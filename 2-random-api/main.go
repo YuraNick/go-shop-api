@@ -5,11 +5,13 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func main() {
 	http.HandleFunc("/random", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(strconv.Itoa(rand.Intn(6))))
+		rand.Seed(time.Now().UnixNano())
+		w.Write([]byte(strconv.Itoa(rand.Intn(6) + 1)))
 		return
 	})
 	port := 81

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 )
 
@@ -29,9 +28,14 @@ func generate(ch chan int) {
 }
 
 func readAndSquare(ch1, ch2 chan int) {
+	i := 0
 	for val := range ch1 {
-		valSq := int(math.Pow(float64(val), 2))
+		valSq := val * val
 		ch2 <- valSq
+		i++
+		if i == 10 {
+			break
+		}
 	}
 	close(ch2)
 }
