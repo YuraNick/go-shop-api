@@ -17,7 +17,6 @@ func main() {
 	random := rand.New(source)
 
 	http.HandleFunc("/random", func(w http.ResponseWriter, r *http.Request) {
-		rand.Seed(time.Now().UnixNano())
 		w.Write([]byte(strconv.Itoa(random.Intn(6) + 1)))
 		return
 	})

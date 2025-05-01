@@ -60,6 +60,7 @@ func (j *JsonFile) ReadJSONByKey(key string, out interface{}) error {
 func (j *JsonFile) CheckJSONByKeyOnce(key string) (bool, error) {
 	file, err := os.Open(j.FilePath)
 	if err != nil {
+		fmt.Printf("failed to open file: %s\n", err.Error())
 		return false, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
@@ -67,12 +68,14 @@ func (j *JsonFile) CheckJSONByKeyOnce(key string) (bool, error) {
 	// Читаем существующие данные
 	var data map[string]interface{}
 	if err := json.NewDecoder(file).Decode(&data); err != nil {
+		fmt.Printf("failed to decode JSON: %s\n", err.Error())
 		return false, fmt.Errorf("failed to decode JSON: %w", err)
 	}
 
 	// Ищем запись по ключу
 	_, exists := data[key]
 	if !exists {
+		fmt.Printf("key '%s' not found\n", key)
 		return false, fmt.Errorf("key '%s' not found", key)
 	}
 

@@ -60,8 +60,7 @@ func (handler VerifyHandler) Send() http.HandlerFunc {
 		e.Subject = "Go sended"
 		// e.Text = []byte("Text Body is, of course, supported!")
 		e.HTML = []byte(fmt.Sprintf("<a href=\"%s\">%s</a>", href, href))
-		// err = e.Send("smtp.yandex.ru:587", smtp.PlainAuth("", handler.Config.Mail.Email, handler.Config.Mail.Password, "smtp.yandex.ru"))
-		err = e.Send("smtp.yandex.ru:587", smtp.PlainAuth("", "yuriy.505@yandex.ru", handler.Config.Mail.Password, "smtp.yandex.ru"))
+		err = e.Send("smtp.yandex.ru:587", smtp.PlainAuth("", handler.Config.Mail.Email, handler.Config.Mail.Password, "smtp.yandex.ru"))
 		if err != nil {
 			resp.SetJson(w, err.Error(), http.StatusBadGateway)
 		}
