@@ -10,6 +10,7 @@ import (
 
 func main() {
 	conf := configs.LoadConfig()
+	fmt.Println(conf)
 	router := http.NewServeMux()
 	jsonFile := jsonfile.NewJsonFile("./data/hash_emails.json")
 

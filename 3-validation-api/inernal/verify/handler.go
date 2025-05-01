@@ -39,8 +39,8 @@ func (handler VerifyHandler) Send() http.HandlerFunc {
 		}
 		emailHash := NewEmailHash(body.Email)
 		for {
-			existedEmailHash, _ := handler.VerifyRepository.GetByHash(emailHash.Hash)
-			if existedEmailHash == nil {
+			ok, _ := handler.VerifyRepository.CheckExistHashOnce(emailHash.Hash)
+			if !ok {
 				break
 			}
 			emailHash.GenerateHash()
@@ -53,28 +53,30 @@ func (handler VerifyHandler) Send() http.HandlerFunc {
 		href := fmt.Sprintf("http://localhost:81/verify/%s", emailHash.Hash)
 
 		e := email.NewEmail()
-		e.From = "Yu Ya <yuriy.505@yandex.ru>"
-		e.To = []string{"yuriy.505@yandex.ru"}
+		e.From = handler.Config.Mail.Address
+		e.To = []string{body.Email}
 		// e.Bcc = []string{"yuriy.505_bcc@yandex.ru"}
 		// e.Cc = []string{"yuriy.505_cc@yandex.ru"}
 		e.Subject = "Go sended"
 		// e.Text = []byte("Text Body is, of course, supported!")
 		e.HTML = []byte(fmt.Sprintf("<a href=\"%s\">%s</a>", href, href))
+		// err = e.Send("smtp.yandex.ru:587", smtp.PlainAuth("", handler.Config.Mail.Email, handler.Config.Mail.Password, "smtp.yandex.ru"))
 		err = e.Send("smtp.yandex.ru:587", smtp.PlainAuth("", "yuriy.505@yandex.ru", handler.Config.Mail.Password, "smtp.yandex.ru"))
 		if err != nil {
-			resp.SetJson(w, err.Error(), http.StatusCreated)
+			resp.SetJson(w, err.Error(), http.StatusBadGateway)
 		}
-		resp.SetJson(w, emailHash, http.StatusCreated)
+		resp.SetJson(w, "true", http.StatusCreated)
 	}
 }
 
 func (handler VerifyHandler) Verify() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		emailHash, err := handler.VerifyRepository.GetByHash(r.PathValue("hash"))
+		ok, err := handler.VerifyRepository.CheckExistHashOnce(r.PathValue("hash"))
 		if err != nil {
-			resp.SetJson(w, err, http.StatusNotFound)
+			fmt.Println("error:", err.Error())
+			resp.SetJson(w, false, http.StatusNotFound)
 			return
 		}
-		resp.SetJson(w, emailHash, http.StatusCreated)
+		resp.SetJson(w, ok, http.StatusCreated)
 	}
 }

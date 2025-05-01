@@ -2,6 +2,7 @@ package jsonfile
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -53,6 +54,38 @@ func (j *JsonFile) ReadJSONByKey(key string, out interface{}) error {
 	}
 
 	return nil
+}
+
+// ReadJSONByKeyOnce читает значение из JSON-файла по ключу и удаляет его из файла
+func (j *JsonFile) CheckJSONByKeyOnce(key string) (bool, error) {
+	file, err := os.Open(j.FilePath)
+	if err != nil {
+		return false, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	// Читаем существующие данные
+	var data map[string]interface{}
+	if err := json.NewDecoder(file).Decode(&data); err != nil {
+		return false, fmt.Errorf("failed to decode JSON: %w", err)
+	}
+
+	// Ищем запись по ключу
+	_, exists := data[key]
+	if !exists {
+		return false, fmt.Errorf("key '%s' not found", key)
+	}
+
+	// запись обнаружена - удаляем её
+	delete(data, key)
+
+	// Шаг 4: Перезаписываем файл
+	err = j.overwriteJSON(data)
+	if err != nil {
+		return false, errors.New("unknown error")
+	}
+
+	return true, nil
 }
 
 // WriteJSONByKey записывает значение в JSON-файл по ключу

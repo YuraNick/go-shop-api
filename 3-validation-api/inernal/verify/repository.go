@@ -13,21 +13,13 @@ func NewVerifyRepository(repo *jsonfile.JsonFile) *VerifyRepository {
 }
 
 func (repo *VerifyRepository) Create(email *EmailHash) (*EmailHash, error) {
-	err := repo.Repo.WriteJSONByKey(email.Hash, email.Email)
+	err := repo.Repo.WriteJSONByKey(email.Hash, email)
 	if err != nil {
 		return nil, err
 	}
 	return email, nil
 }
 
-func (repo *VerifyRepository) GetByHash(hash string) (*EmailHash, error) {
-	var email string
-	err := repo.Repo.ReadJSONByKey(hash, &email)
-	if err != nil {
-		return nil, err
-	}
-	return &EmailHash{
-		Email: email,
-		Hash:  hash,
-	}, nil
+func (repo *VerifyRepository) CheckExistHashOnce(hash string) (bool, error) {
+	return repo.Repo.CheckJSONByKeyOnce(hash)
 }
